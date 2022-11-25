@@ -141,7 +141,7 @@ def test_vae(model):
     mu, logvar, color_out = model(input_color, input_greylevel, z)
     _, _, recon_loss_l2 = \
       vae_loss(mu, logvar, color_out, input_color, lossweights, batchsize)
-    test_loss = test_loss + recon_loss_l2.data[0]
+    test_loss = test_loss + recon_loss_l2
     
   test_loss = (test_loss*1.)/nbatches 
 
@@ -196,7 +196,7 @@ def train_vae(logger=None):
       loss.backward()
       optimizer.step()
 
-      train_loss = train_loss + recon_loss_l2.data[0]
+      train_loss = train_loss + recon_loss_l2
 
       if(logger): 
         logger.update_plot(itr_idx, \
