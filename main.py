@@ -27,7 +27,7 @@ parser.add_argument('dataset_key', help='Dataset')
 parser.add_argument('-g', '--gpu', type=int, default=0,\
                     help='gpu device id')
 
-parser.add_argument('-e', '--epochs', type=int, default=15,\
+parser.add_argument('-e', '--epochs', type=int, default=2,\
                     help='Number of epochs')
 
 parser.add_argument('-b', '--batchsize', type=int, default=32,\
