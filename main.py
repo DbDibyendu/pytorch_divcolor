@@ -39,7 +39,7 @@ parser.add_argument('-z', '--hiddensize', type=int, default=64,\
 parser.add_argument('-n', '--nthreads', type=int, default=4,\
                     help='Data loader threads')
 
-parser.add_argument('-em', '--epochs_mdn', type=int, default=0,\
+parser.add_argument('-em', '--epochs_mdn', type=int, default=1,\
                     help='Number of epochs for MDN')
 
 parser.add_argument('-m', '--nmix', type=int, default=8,\
