@@ -27,10 +27,10 @@ parser.add_argument('dataset_key', help='Dataset')
 parser.add_argument('-g', '--gpu', type=int, default=0,\
                     help='gpu device id')
 
-parser.add_argument('-e', '--epochs', type=int, default=2,\
+parser.add_argument('-e', '--epochs', type=int, default=1,\
                     help='Number of epochs')
 
-parser.add_argument('-b', '--batchsize', type=int, default=32,\
+parser.add_argument('-b', '--batchsize', type=int, default=16,\
                     help='Batch size')
 
 parser.add_argument('-z', '--hiddensize', type=int, default=64,\
@@ -39,7 +39,7 @@ parser.add_argument('-z', '--hiddensize', type=int, default=64,\
 parser.add_argument('-n', '--nthreads', type=int, default=4,\
                     help='Data loader threads')
 
-parser.add_argument('-em', '--epochs_mdn', type=int, default=7,\
+parser.add_argument('-em', '--epochs_mdn', type=int, default=0,\
                     help='Number of epochs for MDN')
 
 parser.add_argument('-m', '--nmix', type=int, default=8,\
@@ -98,7 +98,7 @@ def mdn_loss(gmm_params, mu, stddev, batchsize):
   z = torch.add(mu, torch.mul(eps, stddev))
   z_flat = z.repeat(1, args.nmix)
   z_flat = z_flat.view(batchsize*args.nmix, args.hiddensize)
-  gmm_mu_flat = gmm_mu.view(batchsize*args.nmix, args.hiddensize)
+  gmm_mu_flat = gmm_mu.reshape(batchsize*args.nmix, args.hiddensize)
   dist_all = torch.sqrt(torch.sum(torch.add(z_flat, gmm_mu_flat.mul(-1)).pow(2).mul(50), 1))
   dist_all = dist_all.view(batchsize, args.nmix)
   dist_min, selectids = torch.min(dist_all, 1)
@@ -118,7 +118,7 @@ def test_vae(model):
   nmix = args.nmix 
  
   data = colordata(\
-    os.path.join(out_dir, 'images'), \
+    os.path.join(out_dir, 'image2'), \
     listdir=listdir,\
     featslistdir=featslistdir,
     split='test')
@@ -158,7 +158,7 @@ def train_vae(logger=None):
   nepochs = args.epochs
  
   data = colordata(\
-    os.path.join(out_dir, 'images'), \
+    os.path.join(out_dir, 'image2'), \
     listdir=listdir,\
     featslistdir=featslistdir,
     split='train')
@@ -229,7 +229,7 @@ def train_mdn(logger=None):
   nepochs = args.epochs_mdn
  
   data = colordata(\
-    os.path.join(out_dir, 'images'), \
+    os.path.join(out_dir, 'image2'), \
     listdir=listdir,\
     featslistdir=featslistdir,
     split='train')
@@ -272,10 +272,10 @@ def train_mdn(logger=None):
 
       optimizer.step()
 
-      train_loss = train_loss + loss.data[0]
+      train_loss = train_loss + loss.item()
 
       if(logger): 
-        logger.update_plot(itr_idx, [loss.data[0], loss_l2.data[0]], plot_type='mdn')
+        logger.update_plot(itr_idx, [loss.item(), loss_l2.item()], plot_type='mdn')
         itr_idx += 1
 
     train_loss = (train_loss*1.)/(nbatches)
@@ -289,7 +289,7 @@ def divcolor():
   nmix = args.nmix
  
   data = colordata(\
-    os.path.join(out_dir, 'images'), \
+    os.path.join(out_dir, 'image2'), \
     listdir=listdir,\
     featslistdir=featslistdir,
     split='test')
@@ -317,8 +317,8 @@ def divcolor():
 
     mdn_gmm_params = model_mdn(input_feats)
     gmm_mu, gmm_pi = get_gmm_coeffs(mdn_gmm_params)
-    gmm_pi = gmm_pi.view(-1, 1)
-    gmm_mu = gmm_mu.view(-1, hiddensize)
+    gmm_pi = gmm_pi.reshape(-1, 1)
+    gmm_mu = gmm_mu.reshape(-1, hiddensize)
 
     for j in range(batchsize):
       batch_j = np.tile(batch[j, ...].numpy(), (batchsize, 1, 1, 1))
