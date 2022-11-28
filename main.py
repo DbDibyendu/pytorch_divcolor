@@ -174,8 +174,8 @@ def train_vae(logger=None):
 
   optimizer = optim.Adam(model.parameters(), lr=5e-5)
 
-  vae_loss_values=0
-  test_loss_values=0
+  vae_loss_values=[]
+  test_loss_values=[]
 
   itr_idx = 0
   for epochs in range(nepochs):
@@ -263,7 +263,7 @@ def train_mdn(logger=None):
   optimizer = optim.Adam(model_mdn.parameters(), lr=1e-3)
 
   itr_idx = 0
-  mdn_loss_values=0
+  mdn_loss_values=[]
 
   for epochs_mdn in range(nepochs):
     train_loss = 0.
