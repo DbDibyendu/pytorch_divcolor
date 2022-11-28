@@ -27,10 +27,10 @@ parser.add_argument('dataset_key', help='Dataset')
 parser.add_argument('-g', '--gpu', type=int, default=0,\
                     help='gpu device id')
 
-parser.add_argument('-e', '--epochs', type=int, default=1,\
+parser.add_argument('-e', '--epochs', type=int, default=5,\
                     help='Number of epochs')
 
-parser.add_argument('-b', '--batchsize', type=int, default=16,\
+parser.add_argument('-b', '--batchsize', type=int, default=4,\
                     help='Batch size')
 
 parser.add_argument('-z', '--hiddensize', type=int, default=64,\
@@ -39,7 +39,7 @@ parser.add_argument('-z', '--hiddensize', type=int, default=64,\
 parser.add_argument('-n', '--nthreads', type=int, default=4,\
                     help='Data loader threads')
 
-parser.add_argument('-em', '--epochs_mdn', type=int, default=1,\
+parser.add_argument('-em', '--epochs_mdn', type=int, default=5,\
                     help='Number of epochs for MDN')
 
 parser.add_argument('-m', '--nmix', type=int, default=8,\
@@ -174,6 +174,9 @@ def train_vae(logger=None):
 
   optimizer = optim.Adam(model.parameters(), lr=5e-5)
 
+  vae_loss_values=0
+  test_loss_values=0
+
   itr_idx = 0
   for epochs in range(nepochs):
     train_loss = 0.
@@ -212,14 +215,23 @@ def train_vae(logger=None):
           net_recon_const=batch_recon_const_outres.numpy())
  
     train_loss = (train_loss*1.)/(nbatches)
+    
+    vae_loss_values.append(train_loss)
+
     print('[DEBUG] VAE Train Loss, epoch %d has loss %f' % (epochs, train_loss)) 
 
     test_loss = test_vae(model) 
+    test_loss_values.append(test_loss)
+    
     if(logger):
       logger.update_test_plot(epochs, test_loss)
     print('[DEBUG] VAE Test Loss, epoch %d has loss %f' % (epochs, test_loss)) 
 
     torch.save(model.state_dict(), '%s/models/model_vae.pth' % (out_dir))
+  
+   plt.plot(np.array(vae_loss_values), 'r')
+
+   plt.plot(np.array(test_loss_values), 'r')
 
 def train_mdn(logger=None):
   out_dir, listdir, featslistdir = get_dirpaths(args)
@@ -251,6 +263,8 @@ def train_mdn(logger=None):
   optimizer = optim.Adam(model_mdn.parameters(), lr=1e-3)
 
   itr_idx = 0
+  mdn_loss_values=0
+
   for epochs_mdn in range(nepochs):
     train_loss = 0.
 
